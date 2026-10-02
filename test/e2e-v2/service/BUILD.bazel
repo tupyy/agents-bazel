@@ -1,0 +1,13 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "service",
+    srcs = ["agent.go"],
+    importpath = "github.com/kubev2v/assisted-migration-agent/test/e2e-v2/service",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api/v2:api",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/go.uber.org/zap",
+    ],
+)

@@ -1,0 +1,47 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "vmware",
+    srcs = [
+        "auth.go",
+        "client.go",
+        "datastore.go",
+        "diskmanager.go",
+        "filler_image.go",
+        "finder.go",
+        "helpers.go",
+        "operator.go",
+        "tls.go",
+        "types.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/vmware",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/models",
+        "//pkg/errors",
+        "//vendor/github.com/vmware/govmomi",
+        "//vendor/github.com/vmware/govmomi/find",
+        "//vendor/github.com/vmware/govmomi/object",
+        "//vendor/github.com/vmware/govmomi/session",
+        "//vendor/github.com/vmware/govmomi/vim25",
+        "//vendor/github.com/vmware/govmomi/vim25/methods",
+        "//vendor/github.com/vmware/govmomi/vim25/soap",
+        "//vendor/github.com/vmware/govmomi/vim25/types",
+        "//vendor/go.uber.org/zap",
+    ],
+)
+
+go_test(
+    name = "vmware_test",
+    srcs = [
+        "auth_test.go",
+        "datastore_test.go",
+        "diskmanager_sim_test.go",
+        "tls_test.go",
+    ],
+    embed = [":vmware"],
+    deps = [
+        "//vendor/github.com/vmware/govmomi",
+        "//vendor/github.com/vmware/govmomi/simulator",
+    ],
+)

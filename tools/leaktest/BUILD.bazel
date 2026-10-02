@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "leaktest_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/kubev2v/assisted-migration-agent/tools/leaktest",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "leaktest",
+    embed = [":leaktest_lib"],
+    visibility = ["//visibility:public"],
+)

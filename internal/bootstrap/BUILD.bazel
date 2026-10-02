@@ -1,0 +1,42 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+filegroup(
+    name = "core_srcs",
+    srcs = glob(
+        ["*.go"],
+        exclude = [
+            "config.go",
+            "*_test.go",
+        ],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "bootstrap",
+    srcs = glob(
+        ["*.go"],
+        exclude = ["*_test.go"],
+    ),
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/bootstrap",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//api/v2:api",
+        "//internal/config",
+        "//internal/handlers",
+        "//internal/handlers/v2:handlers",
+        "//internal/models",
+        "//internal/server",
+        "//internal/services",
+        "//internal/store",
+        "//internal/store/migrations",
+        "//pkg/console",
+        "//pkg/crypto",
+        "//vendor/github.com/gin-gonic/gin",
+        "//vendor/github.com/gin-gonic/gin/binding",
+        "//vendor/github.com/go-playground/validator/v10:validator",
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/pkg/opa",
+        "//vendor/go.uber.org/zap",
+    ],
+)

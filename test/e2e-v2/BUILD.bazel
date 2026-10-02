@@ -1,0 +1,40 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "e2e-v2_lib",
+    srcs = [
+        "main.go",
+        "test_applications_endpoint.go",
+        "test_collections_endpoint.go",
+        "test_connected_env.go",
+        "test_groups_endpoint.go",
+        "test_groups_inventory.go",
+        "test_migration_exclusion.go",
+        "test_validation.go",
+        "test_vm_labels.go",
+        "test_vms_endpoint.go",
+        "tests.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/test/e2e-v2",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//api/v2:api",
+        "//pkg/e2e/backend",
+        "//pkg/e2e/infra",
+        "//pkg/e2e/vcsim",
+        "//test/e2e-v2/service",
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1/agent",
+        "//vendor/github.com/oapi-codegen/runtime/types",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+        "//vendor/go.uber.org/zap",
+    ],
+)
+
+go_binary(
+    name = "e2e-v2",
+    embed = [":e2e-v2_lib"],
+    visibility = ["//visibility:public"],
+)

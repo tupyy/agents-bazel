@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/kubev2v/assisted-migration-agent/internal/bootstrap"
 	"github.com/kubev2v/assisted-migration-agent/internal/config"
 	"github.com/kubev2v/assisted-migration-agent/internal/store"
 	"github.com/kubev2v/assisted-migration-agent/internal/store/migrations"
@@ -653,7 +654,7 @@ var _ = Describe("Run Command", func() {
 
 			seedPool.Close()
 
-			pool, err := initPool(cfg)
+			pool, err := bootstrap.InitPool(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			defer pool.Close()
 
@@ -679,7 +680,7 @@ var _ = Describe("Run Command", func() {
 
 			seedPool.Close()
 
-			pool, err := initPool(cfg)
+			pool, err := bootstrap.InitPool(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			defer pool.Close()
 
@@ -703,7 +704,7 @@ var _ = Describe("Run Command", func() {
 
 			seedPool.Close()
 
-			pool, err := initPool(cfg)
+			pool, err := bootstrap.InitPool(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			defer pool.Close()
 
@@ -720,7 +721,7 @@ var _ = Describe("Run Command", func() {
 		It("should be a no-op when no stale collections exist", func() {
 			seedPool.Close()
 
-			pool, err := initPool(cfg)
+			pool, err := bootstrap.InitPool(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			defer pool.Close()
 
@@ -749,7 +750,7 @@ var _ = Describe("Run Command", func() {
 
 			seedPool.Close()
 
-			pool, err := initPool(cfg)
+			pool, err := bootstrap.InitPool(cfg)
 			Expect(err).NotTo(HaveOccurred())
 			defer pool.Close()
 

@@ -1,0 +1,36 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "server",
+    srcs = [
+        "doc.go",
+        "http.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/server",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/config",
+        "//internal/server/middlewares",
+        "//pkg/certificates",
+        "//vendor/github.com/getkin/kin-openapi/openapi3",
+        "//vendor/github.com/gin-contrib/zap",
+        "//vendor/github.com/gin-gonic/gin",
+        "//vendor/github.com/oapi-codegen/gin-middleware",
+        "//vendor/go.uber.org/zap",
+    ],
+)
+
+go_test(
+    name = "server_test",
+    srcs = [
+        "http_test.go",
+        "server_suite_test.go",
+    ],
+    deps = [
+        ":server",
+        "//internal/config",
+        "//vendor/github.com/gin-gonic/gin",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

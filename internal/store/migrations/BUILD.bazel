@@ -1,0 +1,25 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "migrations",
+    srcs = ["migrations.go"],
+    embedsrcs = [
+        "collection/001_initial.sql",
+        "main/001_initial.sql",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/store/migrations",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/go.uber.org/zap"],
+)
+
+go_test(
+    name = "migrations_test",
+    srcs = ["migrations_test.go"],
+    deps = [
+        ":migrations",
+        "//internal/store",
+        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

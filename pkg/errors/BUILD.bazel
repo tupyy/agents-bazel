@@ -1,0 +1,24 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "errors",
+    srcs = [
+        "doc.go",
+        "errors.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/errors",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "errors_test",
+    srcs = [
+        "errors_suite_test.go",
+        "errors_test.go",
+    ],
+    deps = [
+        ":errors",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

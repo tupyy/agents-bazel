@@ -1,0 +1,30 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "rightsizing",
+    srcs = [
+        "stats.go",
+        "vsphere.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/rightsizing",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/vmware/govmomi",
+        "//vendor/github.com/vmware/govmomi/performance",
+        "//vendor/github.com/vmware/govmomi/session",
+        "//vendor/github.com/vmware/govmomi/view",
+        "//vendor/github.com/vmware/govmomi/vim25",
+        "//vendor/github.com/vmware/govmomi/vim25/mo",
+        "//vendor/github.com/vmware/govmomi/vim25/soap",
+        "//vendor/github.com/vmware/govmomi/vim25/types",
+    ],
+)
+
+go_test(
+    name = "rightsizing_test",
+    srcs = [
+        "stats_test.go",
+        "vsphere_test.go",
+    ],
+    embed = [":rightsizing"],
+)

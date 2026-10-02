@@ -1,0 +1,37 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "filter",
+    srcs = [
+        "mappers.go",
+        "test_helpers.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/filter",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/filter",
+        "//vendor/github.com/Masterminds/squirrel",
+    ],
+)
+
+go_test(
+    name = "filter_test",
+    srcs = [
+        "application_test.go",
+        "filter_suite_test.go",
+        "groups_test.go",
+        "labels_integration_test.go",
+        "labels_test.go",
+        "mappers_test.go",
+        "migration_excluded_test.go",
+        "sql_integration_test.go",
+    ],
+    embed = [":filter"],
+    deps = [
+        "//pkg/filter",
+        "//vendor/github.com/Masterminds/squirrel",
+        "//vendor/github.com/duckdb/duckdb-go/v2:duckdb-go",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

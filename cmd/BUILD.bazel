@@ -1,0 +1,48 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        ["*.go"],
+        exclude = ["*_test.go"],
+    ),
+    visibility = ["//visibility:public"],
+)
+
+go_library(
+    name = "cmd",
+    srcs = glob(
+        ["*.go"],
+        exclude = ["*_test.go"],
+    ),
+    importpath = "github.com/kubev2v/assisted-migration-agent/cmd",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/bootstrap",
+        "//internal/config",
+        "//vendor/github.com/ecordell/optgen/helpers",
+        "//vendor/github.com/fatih/color",
+        "//vendor/github.com/go-extras/cobraflags",
+        "//vendor/github.com/jzelinskie/cobrautil/v2:cobrautil",
+        "//vendor/github.com/spf13/cobra",
+        "//vendor/github.com/spf13/pflag",
+        "//vendor/go.uber.org/zap",
+    ],
+)
+
+go_test(
+    name = "cmd_test",
+    srcs = ["run_test.go"],
+    embed = [":cmd"],
+    deps = [
+        "//internal/bootstrap",
+        "//internal/config",
+        "//internal/store",
+        "//internal/store/migrations",
+        "//vendor/github.com/go-extras/cobraflags",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+        "//vendor/github.com/spf13/pflag",
+        "//vendor/github.com/spf13/viper",
+    ],
+)
