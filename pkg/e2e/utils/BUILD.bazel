@@ -1,0 +1,19 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "utils",
+    srcs = [
+        "auth.go",
+        "command.go",
+        "file.go",
+        "rvtools.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/e2e/utils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/e2e/model",
+        "//vendor/github.com/golang-jwt/jwt/v5:jwt",
+        "//vendor/github.com/kubev2v/migration-planner/test/e2e/config",
+        "//vendor/github.com/xuri/excelize/v2:excelize",
+    ],
+)

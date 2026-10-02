@@ -1,0 +1,33 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "filter",
+    srcs = [
+        "ast.go",
+        "doc.go",
+        "lexer.go",
+        "parser.go",
+        "sql.go",
+        "tokens.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/filter",
+    visibility = ["//visibility:public"],
+    deps = ["//vendor/github.com/Masterminds/squirrel"],
+)
+
+go_test(
+    name = "filter_test",
+    srcs = [
+        "filter_suite_test.go",
+        "fuzz_test.go",
+        "lexer_test.go",
+        "parser_test.go",
+        "sql_test.go",
+    ],
+    embed = [":filter"],
+    deps = [
+        "//internal/filter",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

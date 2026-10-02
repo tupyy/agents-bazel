@@ -1,0 +1,34 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "console",
+    srcs = [
+        "client.go",
+        "request_builder.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/console",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/models",
+        "//pkg/errors",
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1/agent",
+        "//vendor/github.com/kubev2v/migration-planner/pkg/client",
+    ],
+)
+
+go_test(
+    name = "console_test",
+    srcs = ["request_builder_test.go"],
+    deps = [
+        ":console",
+        "//internal/models",
+        "//pkg/errors",
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1/agent",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

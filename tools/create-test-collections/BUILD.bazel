@@ -1,0 +1,20 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "create-test-collections_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/kubev2v/assisted-migration-agent/tools/create-test-collections",
+    visibility = ["//visibility:private"],
+    deps = [
+        "//internal/store",
+        "//internal/store/migrations",
+        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser",
+        "//vendor/gopkg.in/yaml.v3:yaml_v3",
+    ],
+)
+
+go_binary(
+    name = "create-test-collections",
+    embed = [":create-test-collections_lib"],
+    visibility = ["//visibility:public"],
+)

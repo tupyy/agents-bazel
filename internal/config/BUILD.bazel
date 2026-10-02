@@ -1,0 +1,16 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "config",
+    srcs = [
+        "config.go",
+        "doc.go",
+        "zz_generated.configuration.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/config",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/creasty/defaults",
+        "//vendor/github.com/ecordell/optgen/helpers",
+    ],
+)

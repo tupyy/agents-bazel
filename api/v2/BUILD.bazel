@@ -1,0 +1,33 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "api",
+    srcs = [
+        "docs.go",
+        "extension.go",
+        "spec.gen.go",
+        "types.gen.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/api/v2",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//internal/models",
+        "//internal/store",
+        "//vendor/github.com/getkin/kin-openapi/openapi3",
+        "//vendor/github.com/gin-gonic/gin",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/github.com/oapi-codegen/runtime",
+        "//vendor/github.com/oapi-codegen/runtime/types",
+    ],
+)
+
+go_test(
+    name = "api_test",
+    srcs = ["extension_test.go"],
+    deps = [
+        ":api",
+        "//internal/models",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

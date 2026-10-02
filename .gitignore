@@ -48,3 +48,8 @@ policies/
 # Editor/IDE
 # .idea/
 # .vscode/
+bazel-assisted-migration-agent
+bazel-bin
+bazel-out
+MODULE.bazel.lock
+bazel-testlogs

@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "offload",
+    srcs = ["registry.go"],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/offload",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "offload_test",
+    srcs = ["registry_test.go"],
+    embed = [":offload"],
+)

@@ -1,0 +1,22 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "backend",
+    srcs = [
+        "assessment.go",
+        "interfaces.go",
+        "service.go",
+        "service_api.go",
+        "source.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/e2e/backend",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/e2e/model",
+        "//pkg/e2e/utils",
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
+        "//vendor/github.com/kubev2v/migration-planner/test/e2e/config",
+        "//vendor/go.uber.org/zap",
+    ],
+)

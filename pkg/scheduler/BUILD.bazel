@@ -1,0 +1,25 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "scheduler",
+    srcs = [
+        "doc.go",
+        "scheduler.go",
+        "types.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/scheduler",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "scheduler_test",
+    srcs = [
+        "scheduler_suite_test.go",
+        "scheduler_test.go",
+    ],
+    deps = [
+        ":scheduler",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

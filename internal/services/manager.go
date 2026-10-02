@@ -184,33 +184,6 @@ func (m *ServiceManager) StopCollecting() error {
 	return nil
 }
 
-func (m *ServiceManager) StartRVToolsCollecting(rvtoolFiles []string) (models.CollectorStatus, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if m.inspector != nil && m.inspector.IsBusy() {
-		return models.CollectorStatus{}, srvErrors.NewInspectionInProgressError()
-	}
-
-	if m.collector != nil && m.collector.GetStatus().State.IsRunning() {
-		return models.CollectorStatus{}, srvErrors.NewCollectionInProgressError()
-	}
-
-	factory, err := newRvtoolWorkFactory(m.pool, rvtoolFiles, m.cfg.Agent.DataFolder, m.validator)
-	if err != nil {
-		return models.CollectorStatus{}, err
-	}
-
-	m.collector = NewCollectorService(factory)
-
-	if err := m.collector.Start(context.Background()); err != nil {
-		m.collector = nil
-		return models.CollectorStatus{}, err
-	}
-
-	return m.collector.GetStatus(), nil
-}
-
 // InspectorService must use the latest collection when returning the inspector
 // Therefore, this methods return the same inspector as long is busy.
 // When the inspector is done, to be sure we use the latest collection
@@ -483,4 +456,30 @@ func (m *ServiceManager) ComparisonService(aId, bId string) (*ComparisonService,
 		models.CollectionMeta{ID: dbA.ID, CreatedAt: dbA.CreatedAt},
 		models.CollectionMeta{ID: dbB.ID, CreatedAt: dbB.CreatedAt},
 	), nil
+}
+
+func (m *ServiceManager) Pool() *store.Pool             { return m.pool }
+func (m *ServiceManager) Config() *config.Configuration { return m.cfg }
+func (m *ServiceManager) OpaValidator() *opa.Validator   { return m.validator }
+
+func (m *ServiceManager) StartCollectingWith(factory CollectorWorkBuilder) (models.CollectorStatus, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.inspector != nil && m.inspector.IsBusy() {
+		return models.CollectorStatus{}, srvErrors.NewInspectionInProgressError()
+	}
+
+	if m.collector != nil && m.collector.GetStatus().State.IsRunning() {
+		return models.CollectorStatus{}, srvErrors.NewCollectionInProgressError()
+	}
+
+	m.collector = NewCollectorService(factory)
+
+	if err := m.collector.Start(context.Background()); err != nil {
+		m.collector = nil
+		return models.CollectorStatus{}, err
+	}
+
+	return m.collector.GetStatus(), nil
 }

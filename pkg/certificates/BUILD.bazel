@@ -1,0 +1,21 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "certificates",
+    srcs = ["provider.go"],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/certificates",
+    visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "certificates_test",
+    srcs = [
+        "certificates_suite_test.go",
+        "provider_test.go",
+    ],
+    deps = [
+        ":certificates",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)

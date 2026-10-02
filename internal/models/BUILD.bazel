@@ -1,0 +1,37 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "models",
+    srcs = [
+        "agent.go",
+        "application.go",
+        "capabilities.go",
+        "collection.go",
+        "collector.go",
+        "comparison.go",
+        "configuration.go",
+        "forecaster.go",
+        "group.go",
+        "inspection.go",
+        "inspector.go",
+        "inventory.go",
+        "outbox.go",
+        "rightsizing.go",
+        "vcenter.go",
+        "vddk.go",
+        "vm.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/internal/models",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//vendor/github.com/google/uuid",
+        "//vendor/github.com/kubev2v/migration-planner/pkg/inventory",
+        "//vendor/github.com/vmware/govmomi",
+    ],
+)
+
+go_test(
+    name = "models_test",
+    srcs = ["vcenter_test.go"],
+    deps = [":models"],
+)

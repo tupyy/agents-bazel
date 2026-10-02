@@ -1,0 +1,33 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "work",
+    srcs = [
+        "doc.go",
+        "models.go",
+        "pipeline.go",
+        "pool.go",
+    ],
+    importpath = "github.com/kubev2v/assisted-migration-agent/pkg/work",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/errors",
+        "//pkg/scheduler",
+    ],
+)
+
+go_test(
+    name = "work_test",
+    srcs = [
+        "pipeline_test.go",
+        "pool_fuzz_test.go",
+        "pool_test.go",
+        "work_suite_test.go",
+    ],
+    deps = [
+        ":work",
+        "//pkg/scheduler",
+        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
+        "//vendor/github.com/onsi/gomega",
+    ],
+)
