@@ -7,7 +7,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//api/v2:api",
-        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
-        "//vendor/go.uber.org/zap",
+        "@com_github_kubev2v_migration_planner//api/v1alpha1:go_default_library",
+        "@org_uber_go_zap//:go_default_library",
     ],
 )

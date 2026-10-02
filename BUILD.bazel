@@ -1,4 +1,7 @@
+load("@gazelle//:def.bzl", "gazelle")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+gazelle(name = "gazelle")
 
 filegroup(
     name = "main_srcs",
@@ -15,9 +18,9 @@ go_library(
         "//cmd",
         "//internal/config",
         "//pkg/logger",
-        "//vendor/github.com/spf13/cobra",
-        "//vendor/go.uber.org/zap",
-        "//vendor/go.uber.org/zap/zapcore",
+        "@com_github_spf13_cobra//:go_default_library",
+        "@org_uber_go_zap//:go_default_library",
+        "@org_uber_go_zap//zapcore:go_default_library",
     ],
 )
 

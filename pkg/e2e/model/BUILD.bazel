@@ -5,5 +5,5 @@ go_library(
     srcs = ["auth.go"],
     importpath = "github.com/kubev2v/assisted-migration-agent/pkg/e2e/model",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/golang-jwt/jwt/v5:jwt"],
+    deps = ["@com_github_golang_jwt_jwt_v5//:go_default_library"],
 )

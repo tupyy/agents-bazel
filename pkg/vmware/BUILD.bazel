@@ -19,15 +19,15 @@ go_library(
     deps = [
         "//internal/models",
         "//pkg/errors",
-        "//vendor/github.com/vmware/govmomi",
-        "//vendor/github.com/vmware/govmomi/find",
-        "//vendor/github.com/vmware/govmomi/object",
-        "//vendor/github.com/vmware/govmomi/session",
-        "//vendor/github.com/vmware/govmomi/vim25",
-        "//vendor/github.com/vmware/govmomi/vim25/methods",
-        "//vendor/github.com/vmware/govmomi/vim25/soap",
-        "//vendor/github.com/vmware/govmomi/vim25/types",
-        "//vendor/go.uber.org/zap",
+        "@com_github_vmware_govmomi//:go_default_library",
+        "@com_github_vmware_govmomi//find:go_default_library",
+        "@com_github_vmware_govmomi//object:go_default_library",
+        "@com_github_vmware_govmomi//session:go_default_library",
+        "@com_github_vmware_govmomi//vim25:go_default_library",
+        "@com_github_vmware_govmomi//vim25/methods:go_default_library",
+        "@com_github_vmware_govmomi//vim25/soap:go_default_library",
+        "@com_github_vmware_govmomi//vim25/types:go_default_library",
+        "@org_uber_go_zap//:go_default_library",
     ],
 )
 
@@ -41,7 +41,7 @@ go_test(
     ],
     embed = [":vmware"],
     deps = [
-        "//vendor/github.com/vmware/govmomi",
-        "//vendor/github.com/vmware/govmomi/simulator",
+        "@com_github_vmware_govmomi//:go_default_library",
+        "@com_github_vmware_govmomi//simulator:go_default_library",
     ],
 )

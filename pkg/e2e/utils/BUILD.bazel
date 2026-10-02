@@ -12,8 +12,8 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/e2e/model",
-        "//vendor/github.com/golang-jwt/jwt/v5:jwt",
-        "//vendor/github.com/kubev2v/migration-planner/test/e2e/config",
-        "//vendor/github.com/xuri/excelize/v2:excelize",
+        "@com_github_golang_jwt_jwt_v5//:go_default_library",
+        "@com_github_kubev2v_migration_planner//test/e2e/config:go_default_library",
+        "@com_github_xuri_excelize_v2//:go_default_library",
     ],
 )

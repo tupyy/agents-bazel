@@ -2,31 +2,28 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 filegroup(
     name = "srcs",
-    srcs = glob(
-        ["*.go"],
-        exclude = ["*_test.go"],
-    ),
+    srcs = glob(["*.go"], exclude = ["*_test.go"]),
     visibility = ["//visibility:public"],
 )
 
 go_library(
     name = "cmd",
-    srcs = glob(
-        ["*.go"],
-        exclude = ["*_test.go"],
-    ),
+    srcs = [
+        "run.go",
+        "version.go",
+    ],
     importpath = "github.com/kubev2v/assisted-migration-agent/cmd",
     visibility = ["//visibility:public"],
     deps = [
         "//internal/bootstrap",
         "//internal/config",
-        "//vendor/github.com/ecordell/optgen/helpers",
-        "//vendor/github.com/fatih/color",
-        "//vendor/github.com/go-extras/cobraflags",
-        "//vendor/github.com/jzelinskie/cobrautil/v2:cobrautil",
-        "//vendor/github.com/spf13/cobra",
-        "//vendor/github.com/spf13/pflag",
-        "//vendor/go.uber.org/zap",
+        "@com_github_ecordell_optgen//helpers:go_default_library",
+        "@com_github_fatih_color//:go_default_library",
+        "@com_github_go_extras_cobraflags//:go_default_library",
+        "@com_github_jzelinskie_cobrautil_v2//:go_default_library",
+        "@com_github_spf13_cobra//:go_default_library",
+        "@com_github_spf13_pflag//:go_default_library",
+        "@org_uber_go_zap//:go_default_library",
     ],
 )
 
@@ -39,10 +36,10 @@ go_test(
         "//internal/config",
         "//internal/store",
         "//internal/store/migrations",
-        "//vendor/github.com/go-extras/cobraflags",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
-        "//vendor/github.com/spf13/pflag",
-        "//vendor/github.com/spf13/viper",
+        "@com_github_go_extras_cobraflags//:go_default_library",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
+        "@com_github_spf13_pflag//:go_default_library",
+        "@com_github_spf13_viper//:go_default_library",
     ],
 )

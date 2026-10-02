@@ -14,9 +14,9 @@ go_library(
     deps = [
         "//pkg/e2e/model",
         "//pkg/e2e/utils",
-        "//vendor/github.com/google/uuid",
-        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
-        "//vendor/github.com/kubev2v/migration-planner/test/e2e/config",
-        "//vendor/go.uber.org/zap",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_kubev2v_migration_planner//api/v1alpha1:go_default_library",
+        "@com_github_kubev2v_migration_planner//test/e2e/config:go_default_library",
+        "@org_uber_go_zap//:go_default_library",
     ],
 )

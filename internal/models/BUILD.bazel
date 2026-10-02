@@ -24,9 +24,9 @@ go_library(
     importpath = "github.com/kubev2v/assisted-migration-agent/internal/models",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/google/uuid",
-        "//vendor/github.com/kubev2v/migration-planner/pkg/inventory",
-        "//vendor/github.com/vmware/govmomi",
+        "@com_github_google_uuid//:go_default_library",
+        "@com_github_kubev2v_migration_planner//pkg/inventory:go_default_library",
+        "@com_github_vmware_govmomi//:go_default_library",
     ],
 )
 

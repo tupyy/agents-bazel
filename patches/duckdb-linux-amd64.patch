@@ -1,0 +1,183 @@
+--- BUILD.bazel
++++ BUILD.bazel
+@@ -1,4 +1,165 @@
+ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
++load("@rules_cc//cc:cc_import.bzl", "cc_import")
++load("@rules_cc//cc:cc_library.bzl", "cc_library")
++
++cc_import(
++    name = "lib_autocomplete_extension",
++    alwayslink = True,
++    static_library = "libautocomplete_extension.a",
++)
++
++cc_import(
++    name = "lib_core_functions_extension",
++    alwayslink = True,
++    static_library = "libcore_functions_extension.a",
++)
++
++cc_import(
++    name = "lib_duckdb_fastpforlib",
++    alwayslink = True,
++    static_library = "libduckdb_fastpforlib.a",
++)
++
++cc_import(
++    name = "lib_duckdb_fmt",
++    alwayslink = True,
++    static_library = "libduckdb_fmt.a",
++)
++
++cc_import(
++    name = "lib_duckdb_fsst",
++    alwayslink = True,
++    static_library = "libduckdb_fsst.a",
++)
++
++cc_import(
++    name = "lib_duckdb_hyperloglog",
++    alwayslink = True,
++    static_library = "libduckdb_hyperloglog.a",
++)
++
++cc_import(
++    name = "lib_duckdb_mbedtls",
++    alwayslink = True,
++    static_library = "libduckdb_mbedtls.a",
++)
++
++cc_import(
++    name = "lib_duckdb_miniz",
++    alwayslink = True,
++    static_library = "libduckdb_miniz.a",
++)
++
++cc_import(
++    name = "lib_duckdb_pg_query",
++    alwayslink = True,
++    static_library = "libduckdb_pg_query.a",
++)
++
++cc_import(
++    name = "lib_duckdb_re2",
++    alwayslink = True,
++    static_library = "libduckdb_re2.a",
++)
++
++cc_import(
++    name = "lib_duckdb_skiplistlib",
++    alwayslink = True,
++    static_library = "libduckdb_skiplistlib.a",
++)
++
++cc_import(
++    name = "lib_duckdb_static",
++    alwayslink = True,
++    static_library = "libduckdb_static.a",
++)
++
++cc_import(
++    name = "lib_duckdb_utf8proc",
++    alwayslink = True,
++    static_library = "libduckdb_utf8proc.a",
++)
++
++cc_import(
++    name = "lib_duckdb_yyjson",
++    alwayslink = True,
++    static_library = "libduckdb_yyjson.a",
++)
++
++cc_import(
++    name = "lib_duckdb_zstd",
++    alwayslink = True,
++    static_library = "libduckdb_zstd.a",
++)
++
++cc_import(
++    name = "lib_icu_extension",
++    alwayslink = True,
++    static_library = "libicu_extension.a",
++)
++
++cc_import(
++    name = "lib_jemalloc_extension",
++    alwayslink = True,
++    static_library = "libjemalloc_extension.a",
++)
++
++cc_import(
++    name = "lib_json_extension",
++    alwayslink = True,
++    static_library = "libjson_extension.a",
++)
++
++cc_import(
++    name = "lib_parquet_extension",
++    alwayslink = True,
++    static_library = "libparquet_extension.a",
++)
++
++cc_import(
++    name = "lib_tpcds_extension",
++    alwayslink = True,
++    static_library = "libtpcds_extension.a",
++)
++
++cc_import(
++    name = "lib_tpch_extension",
++    alwayslink = True,
++    static_library = "libtpch_extension.a",
++)
++
++cc_library(
++    name = "duckdb_all",
++    hdrs = [
++        "duckdb.h",
++        "duckdb_go_bindings.h",
++    ],
++    # Keep the upstream CGo link order: core, extensions, then helper archives.
++    # rules_go 0.64.1 flattens CcInfo libraries without honoring alwayslink.
++    deps = [
++        ":lib_duckdb_static",
++        ":lib_autocomplete_extension",
++        ":lib_core_functions_extension",
++        ":lib_icu_extension",
++        ":lib_json_extension",
++        ":lib_parquet_extension",
++        ":lib_jemalloc_extension",
++        ":lib_tpcds_extension",
++        ":lib_tpch_extension",
++        ":lib_duckdb_fastpforlib",
++        ":lib_duckdb_fmt",
++        ":lib_duckdb_fsst",
++        ":lib_duckdb_hyperloglog",
++        ":lib_duckdb_mbedtls",
++        ":lib_duckdb_miniz",
++        ":lib_duckdb_pg_query",
++        ":lib_duckdb_re2",
++        ":lib_duckdb_skiplistlib",
++        ":lib_duckdb_utf8proc",
++        ":lib_duckdb_yyjson",
++        ":lib_duckdb_zstd",
++    ],
++)
+ 
+ go_library(
+     name = "linux-amd64",
+@@ -10,7 +171,13 @@
+         "duckdb_go_bindings.h",
+     ],
+     cgo = True,
+-    clinkopts = ["-rdynamic -lduckdb_static -lautocomplete_extension -lcore_functions_extension -licu_extension -ljson_extension -lparquet_extension -ljemalloc_extension -ltpcds_extension -ltpch_extension -lduckdb_fastpforlib -lduckdb_fmt -lduckdb_fsst -lduckdb_hyperloglog -lduckdb_mbedtls -lduckdb_miniz -lduckdb_pg_query -lduckdb_re2 -lduckdb_skiplistlib -lduckdb_utf8proc -lduckdb_yyjson -lduckdb_zstd -lstdc++ -lm -ldl -Lexternal/gazelle++go_deps+com_github_duckdb_duckdb_go_bindings_linux_amd64"],
++    cdeps = [":duckdb_all"],
++    clinkopts = [
++        "-rdynamic",
++        "-lstdc++",
++        "-lm",
++        "-ldl",
++    ],
+     cppopts = ["-DDUCKDB_STATIC_BUILD"],
+     importpath = "github.com/duckdb/duckdb-go-bindings/linux-amd64",
+     visibility = ["//visibility:public"],

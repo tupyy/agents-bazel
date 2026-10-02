@@ -12,7 +12,7 @@ go_library(
     ],
     importpath = "github.com/kubev2v/assisted-migration-agent/pkg/filter",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/Masterminds/squirrel"],
+    deps = ["@com_github_masterminds_squirrel//:go_default_library"],
 )
 
 go_test(
@@ -27,7 +27,7 @@ go_test(
     embed = [":filter"],
     deps = [
         "//internal/filter",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
     ],
 )

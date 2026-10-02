@@ -8,8 +8,8 @@ go_library(
     deps = [
         "//internal/store",
         "//internal/store/migrations",
-        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser",
-        "//vendor/gopkg.in/yaml.v3:yaml_v3",
+        "@com_github_kubev2v_migration_planner//pkg/duckdb_parser:go_default_library",
+        "@in_gopkg_yaml_v3//:go_default_library",
     ],
 )
 

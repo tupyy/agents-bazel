@@ -10,7 +10,7 @@ go_library(
     importpath = "github.com/kubev2v/assisted-migration-agent/internal/config",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/creasty/defaults",
-        "//vendor/github.com/ecordell/optgen/helpers",
+        "@com_github_creasty_defaults//:go_default_library",
+        "@com_github_ecordell_optgen//helpers:go_default_library",
     ],
 )

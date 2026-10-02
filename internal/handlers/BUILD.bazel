@@ -5,5 +5,5 @@ go_library(
     srcs = ["validation.go"],
     importpath = "github.com/kubev2v/assisted-migration-agent/internal/handlers",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/github.com/go-playground/validator/v10:validator"],
+    deps = ["@com_github_go_playground_validator_v10//:go_default_library"],
 )

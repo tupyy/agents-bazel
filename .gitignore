@@ -53,3 +53,4 @@ bazel-bin
 bazel-out
 MODULE.bazel.lock
 bazel-testlogs
+bazel-agents-bazel

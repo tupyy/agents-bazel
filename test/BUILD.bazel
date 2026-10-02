@@ -10,7 +10,7 @@ go_library(
     importpath = "github.com/kubev2v/assisted-migration-agent/test",
     visibility = ["//visibility:public"],
     deps = [
-        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser",
-        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser/models",
+        "@com_github_kubev2v_migration_planner//pkg/duckdb_parser:go_default_library",
+        "@com_github_kubev2v_migration_planner//pkg/duckdb_parser/models:go_default_library",
     ],
 )

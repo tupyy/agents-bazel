@@ -10,7 +10,7 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/filter",
-        "//vendor/github.com/Masterminds/squirrel",
+        "@com_github_masterminds_squirrel//:go_default_library",
     ],
 )
 
@@ -29,9 +29,9 @@ go_test(
     embed = [":filter"],
     deps = [
         "//pkg/filter",
-        "//vendor/github.com/Masterminds/squirrel",
-        "//vendor/github.com/duckdb/duckdb-go/v2:duckdb-go",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
+        "@com_github_duckdb_duckdb_go_v2//:go_default_library",
+        "@com_github_masterminds_squirrel//:go_default_library",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
     ],
 )

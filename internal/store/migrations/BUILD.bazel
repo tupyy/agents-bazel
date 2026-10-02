@@ -9,7 +9,7 @@ go_library(
     ],
     importpath = "github.com/kubev2v/assisted-migration-agent/internal/store/migrations",
     visibility = ["//visibility:public"],
-    deps = ["//vendor/go.uber.org/zap"],
+    deps = ["@org_uber_go_zap//:go_default_library"],
 )
 
 go_test(
@@ -18,8 +18,8 @@ go_test(
     deps = [
         ":migrations",
         "//internal/store",
-        "//vendor/github.com/kubev2v/migration-planner/pkg/duckdb_parser",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
+        "@com_github_kubev2v_migration_planner//pkg/duckdb_parser:go_default_library",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
     ],
 )

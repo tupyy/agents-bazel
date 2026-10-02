@@ -13,11 +13,11 @@ go_library(
     deps = [
         "//internal/models",
         "//internal/store",
-        "//vendor/github.com/getkin/kin-openapi/openapi3",
-        "//vendor/github.com/gin-gonic/gin",
-        "//vendor/github.com/kubev2v/migration-planner/api/v1alpha1",
-        "//vendor/github.com/oapi-codegen/runtime",
-        "//vendor/github.com/oapi-codegen/runtime/types",
+        "@com_github_getkin_kin_openapi//openapi3:go_default_library",
+        "@com_github_gin_gonic_gin//:go_default_library",
+        "@com_github_kubev2v_migration_planner//api/v1alpha1:go_default_library",
+        "@com_github_oapi_codegen_runtime//:go_default_library",
+        "@com_github_oapi_codegen_runtime//types:go_default_library",
     ],
 )
 
@@ -27,7 +27,7 @@ go_test(
     deps = [
         ":api",
         "//internal/models",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
     ],
 )

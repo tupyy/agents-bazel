@@ -27,7 +27,7 @@ go_test(
     deps = [
         ":work",
         "//pkg/scheduler",
-        "//vendor/github.com/onsi/ginkgo/v2:ginkgo",
-        "//vendor/github.com/onsi/gomega",
+        "@com_github_onsi_ginkgo_v2//:go_default_library",
+        "@com_github_onsi_gomega//:go_default_library",
     ],
 )
