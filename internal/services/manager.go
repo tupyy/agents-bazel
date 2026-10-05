@@ -457,29 +457,3 @@ func (m *ServiceManager) ComparisonService(aId, bId string) (*ComparisonService,
 		models.CollectionMeta{ID: dbB.ID, CreatedAt: dbB.CreatedAt},
 	), nil
 }
-
-func (m *ServiceManager) Pool() *store.Pool             { return m.pool }
-func (m *ServiceManager) Config() *config.Configuration { return m.cfg }
-func (m *ServiceManager) OpaValidator() *opa.Validator   { return m.validator }
-
-func (m *ServiceManager) StartCollectingWith(factory CollectorWorkBuilder) (models.CollectorStatus, error) {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if m.inspector != nil && m.inspector.IsBusy() {
-		return models.CollectorStatus{}, srvErrors.NewInspectionInProgressError()
-	}
-
-	if m.collector != nil && m.collector.GetStatus().State.IsRunning() {
-		return models.CollectorStatus{}, srvErrors.NewCollectionInProgressError()
-	}
-
-	m.collector = NewCollectorService(factory)
-
-	if err := m.collector.Start(context.Background()); err != nil {
-		m.collector = nil
-		return models.CollectorStatus{}, err
-	}
-
-	return m.collector.GetStatus(), nil
-}
