@@ -1,36 +1,28 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_test")
+load(":defs.bzl", "bootstrap_library")
 
 filegroup(
     name = "core_srcs",
-    srcs = glob(["*.go"], exclude = ["config.go", "*_test.go"]),
+    srcs = ["bootstrap.go", "builder.go"],
     visibility = ["//visibility:public"],
 )
 
-go_library(
+exports_files(["default_bootstrap.go"])
+
+bootstrap_library(
     name = "bootstrap",
-    srcs = [
-        "bootstrap.go",
-        "config.go",
-    ],
-    importpath = "github.com/kubev2v/assisted-migration-agent/internal/bootstrap",
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "bootstrap_test",
+    srcs = ["builder_test.go"],
+    embed = [":bootstrap"],
     deps = [
-        "//api/v2:api",
         "//internal/config",
-        "//internal/handlers",
-        "//internal/handlers/v2:handlers",
-        "//internal/models",
         "//internal/server",
         "//internal/services",
         "//internal/store",
-        "//internal/store/migrations",
-        "//pkg/console",
-        "//pkg/crypto",
         "@com_github_gin_gonic_gin//:go_default_library",
-        "@com_github_gin_gonic_gin//binding:go_default_library",
-        "@com_github_go_playground_validator_v10//:go_default_library",
-        "@com_github_google_uuid//:go_default_library",
-        "@com_github_kubev2v_migration_planner//pkg/opa:go_default_library",
-        "@org_uber_go_zap//:go_default_library",
     ],
 )

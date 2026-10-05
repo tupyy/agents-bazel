@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -21,94 +20,14 @@ import (
 
 	"github.com/kubev2v/migration-planner/pkg/opa"
 
-	v2 "github.com/kubev2v/assisted-migration-agent/api/v2"
 	"github.com/kubev2v/assisted-migration-agent/internal/config"
 	"github.com/kubev2v/assisted-migration-agent/internal/handlers"
-	v2Handlers "github.com/kubev2v/assisted-migration-agent/internal/handlers/v2"
 	"github.com/kubev2v/assisted-migration-agent/internal/models"
-	"github.com/kubev2v/assisted-migration-agent/internal/server"
-	service "github.com/kubev2v/assisted-migration-agent/internal/services"
 	"github.com/kubev2v/assisted-migration-agent/internal/store"
 	"github.com/kubev2v/assisted-migration-agent/internal/store/migrations"
 	"github.com/kubev2v/assisted-migration-agent/pkg/console"
 	"github.com/kubev2v/assisted-migration-agent/pkg/crypto"
 )
-
-const apiV2 string = "/api/v2"
-
-type HandlerFactory func(cfg config.Configuration, svc v2Handlers.ServiceProvider) v2.ServerInterface
-
-type Bootstrap struct {
-	handlerFactory HandlerFactory
-	preValidation  func(cfg *config.Configuration) error
-}
-
-func defaultHandlerFactory(cfg config.Configuration, svc v2Handlers.ServiceProvider) v2.ServerInterface {
-	return v2Handlers.NewHandler(cfg, svc)
-}
-
-func New(cfg *config.Configuration) (*server.Server, func(), error) {
-	b := &Bootstrap{
-		handlerFactory: defaultHandlerFactory,
-	}
-	configure(b)
-
-	if b.preValidation != nil {
-		if err := b.preValidation(cfg); err != nil {
-			return nil, nil, err
-		}
-	}
-
-	if err := ValidateConfiguration(cfg); err != nil {
-		return nil, nil, err
-	}
-
-	opaValidator, err := InitOPA(cfg)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pool, err := InitPool(cfg)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	consoleClient, km, err := InitShared(cfg)
-	if err != nil {
-		pool.Close()
-		return nil, nil, err
-	}
-
-	svcMgr := service.NewServiceManager(
-		service.WithConfig(cfg),
-		service.WithPool(pool),
-		service.WithConsoleClient(consoleClient),
-		service.WithKeyManager(km),
-		service.WithOpaValidator(opaValidator),
-	)
-	if err := svcMgr.Initialize(); err != nil {
-		pool.Close()
-		return nil, nil, fmt.Errorf("failed to initialize service: %w", err)
-	}
-
-	RegisterValidators()
-
-	handler := b.handlerFactory(*cfg, svcMgr)
-
-	cleanup := func() {
-		svcMgr.Stop(context.Background())
-		pool.Close()
-		zap.S().Info("v2 service and pool closed")
-	}
-
-	srv, cleanupFn, err := BuildServer(cfg, handler, cleanup)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-
-	return srv, cleanupFn, nil
-}
 
 func ValidateConfiguration(cfg *config.Configuration) error {
 	if cfg.Agent.DataFolder == "" {
@@ -256,27 +175,6 @@ func RegisterValidators() {
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		handlers.RegisterValidators(v)
 	}
-}
-
-func BuildServer(cfg *config.Configuration, handler v2.ServerInterface, cleanup func()) (*server.Server, func(), error) {
-	swagger, err := v2.GetSwagger()
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to load v2 swagger spec: %w", err)
-	}
-
-	srv, err := server.NewServer(cfg, map[string]server.APIGroup{
-		apiV2: {
-			Swagger: swagger,
-			RegisterFn: func(router *gin.RouterGroup) {
-				v2.RegisterHandlers(router, handler)
-			},
-		},
-	})
-	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create http server: %w", err)
-	}
-
-	return srv, cleanup, nil
 }
 
 func cleanupStaleCollections(mainDB *store.Database, dataFolder string) error {
