@@ -22,10 +22,10 @@ import (
 // New selects the public API. Private builds replace this file, retaining the
 // shared builder and the entry point used by the CLI.
 func New(cfg *config.Configuration) (*server.Server, func(), error) {
-	return NewBuilder(cfg).WithGroup("/api/v2", publicAPIGroup).Build()
+	return NewBuilder(cfg).WithGroup("/api/v2", initAPIGroup).Build()
 }
 
-func publicAPIGroup(cfg *config.Configuration, pool *store.Pool, validator *opa.Validator) (server.APIGroup, func(), error) {
+func initAPIGroup(cfg *config.Configuration, pool *store.Pool, validator *opa.Validator) (server.APIGroup, func(), error) {
 	jwt := ""
 	if cfg.Auth.Enabled {
 		data, err := os.ReadFile(cfg.Auth.JWTFilePath)

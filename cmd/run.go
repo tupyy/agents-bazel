@@ -3,12 +3,14 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+	"uuid"
 
 	"github.com/ecordell/optgen/helpers"
 	"github.com/fatih/color"
@@ -21,6 +23,7 @@ import (
 
 	"github.com/kubev2v/assisted-migration-agent/internal/bootstrap"
 	"github.com/kubev2v/assisted-migration-agent/internal/config"
+	"github.com/kubev2v/assisted-migration-agent/internal/models"
 )
 
 func NewRunCommand(cfg *config.Configuration) *cobra.Command {
@@ -36,6 +39,9 @@ func NewRunCommand(cfg *config.Configuration) *cobra.Command {
 
   # Run agent in production mode
   agent run --agent-id 550e8400-e29b-41d4-a716-446655440000 --source-id 6ba7b810-9dad-11d1-80b4-00c04fd430c8 --server-mode prod --server-statics-folder /var/www/statics`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return validateConfiguration(cfg)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			zap.S().Infow("using configuration",
 				"agent", helpers.Flatten(cfg.Agent.DebugMap()),
@@ -88,6 +94,56 @@ func NewRunCommand(cfg *config.Configuration) *cobra.Command {
 	cobraflags.CobraOnInitialize("AGENT", runCmd)
 
 	return runCmd
+}
+
+func validateConfiguration(cfg *config.Configuration) error {
+	if cfg.Agent.DataFolder == "" {
+		return errors.New("data folder must be set")
+	}
+
+	if config.ServerModeType(cfg.Server.ServerMode) == config.ServerModeProd && cfg.Server.StaticsFolder == "" {
+		return errors.New("statics folder must be set when server mode is production")
+	}
+
+	if cfg.Server.HTTPPort < 1 || cfg.Server.HTTPPort > 65535 {
+		return fmt.Errorf("invalid http-port %d: must be between 1 and 65535", cfg.Server.HTTPPort)
+	}
+
+	if cfg.Auth.Enabled && cfg.Auth.JWTFilePath == "" {
+		return errors.New("authentication-jwt-filepath must be set when authentication is enabled")
+	}
+
+	switch config.ServerModeType(cfg.Server.ServerMode) {
+	case config.ServerModeProd, config.ServerModeDev:
+	default:
+		return fmt.Errorf("invalid server mode %q: must be %q or %q", cfg.Server.ServerMode, config.ServerModeProd, config.ServerModeDev)
+	}
+
+	validateUUID := func(value, name string) error {
+		if value == "" {
+			return fmt.Errorf("%s cannot be empty", name)
+		}
+		if _, err := uuid.Parse(value); err != nil {
+			return fmt.Errorf("%s must be a valid UUID: %w", name, err)
+		}
+		return nil
+
+	}
+
+	if err := validateUUID(cfg.Agent.ID, "agent-id"); err != nil {
+		return err
+	}
+	if err := validateUUID(cfg.Agent.SourceID, "source-id"); err != nil {
+		return err
+	}
+
+	switch models.AgentMode(cfg.Agent.Mode) {
+	case models.AgentModeConnected, models.AgentModeDisconnected:
+	default:
+		return fmt.Errorf("invalid mode %q: must be %q or %q", cfg.Agent.Mode, models.AgentModeConnected, models.AgentModeDisconnected)
+	}
+
+	return nil
 }
 
 func registerFlags(cmd *cobra.Command, config *config.Configuration) {

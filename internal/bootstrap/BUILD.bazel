@@ -2,7 +2,7 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 filegroup(
     name = "core_srcs",
-    srcs = ["bootstrap.go", "builder.go"],
+    srcs = ["bootstrap.go"],
     visibility = ["//visibility:public"],
 )
 

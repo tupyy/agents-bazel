@@ -17,6 +17,7 @@ go_library(
     deps = [
         "//internal/bootstrap",
         "//internal/config",
+        "//internal/models",
         "@com_github_ecordell_optgen//helpers:go_default_library",
         "@com_github_fatih_color//:go_default_library",
         "@com_github_go_extras_cobraflags//:go_default_library",

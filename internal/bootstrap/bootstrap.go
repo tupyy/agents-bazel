@@ -5,78 +5,141 @@ import (
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
-	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
-
-	"github.com/kubev2v/migration-planner/pkg/opa"
-
 	"github.com/kubev2v/assisted-migration-agent/internal/config"
 	"github.com/kubev2v/assisted-migration-agent/internal/handlers"
-	"github.com/kubev2v/assisted-migration-agent/internal/models"
+	"github.com/kubev2v/assisted-migration-agent/internal/server"
 	"github.com/kubev2v/assisted-migration-agent/internal/store"
 	"github.com/kubev2v/assisted-migration-agent/internal/store/migrations"
+	"github.com/kubev2v/migration-planner/pkg/opa"
+	"go.uber.org/zap"
 )
 
-func ValidateConfiguration(cfg *config.Configuration) error {
-	if cfg.Agent.DataFolder == "" {
-		return errors.New("data folder must be set")
-	}
+// APIGroupFactory initializes its provider and assembles its routes from shared inputs.
+// Any returned cleanup runs before the shared pool closes, even when err is non-nil.
+type APIGroupFactory func(*config.Configuration, *store.Pool, *opa.Validator) (server.APIGroup, func(), error)
 
-	if config.ServerModeType(cfg.Server.ServerMode) == config.ServerModeProd && cfg.Server.StaticsFolder == "" {
-		return errors.New("statics folder must be set when server mode is production")
-	}
-
-	if cfg.Server.HTTPPort < 1 || cfg.Server.HTTPPort > 65535 {
-		return fmt.Errorf("invalid http-port %d: must be between 1 and 65535", cfg.Server.HTTPPort)
-	}
-
-	if cfg.Auth.Enabled && cfg.Auth.JWTFilePath == "" {
-		return errors.New("authentication-jwt-filepath must be set when authentication is enabled")
-	}
-
-	switch config.ServerModeType(cfg.Server.ServerMode) {
-	case config.ServerModeProd, config.ServerModeDev:
-	default:
-		return fmt.Errorf("invalid server mode %q: must be %q or %q", cfg.Server.ServerMode, config.ServerModeProd, config.ServerModeDev)
-	}
-
-	if err := validateUUID(cfg.Agent.ID, "agent-id"); err != nil {
-		return err
-	}
-	if err := validateUUID(cfg.Agent.SourceID, "source-id"); err != nil {
-		return err
-	}
-
-	switch models.AgentMode(cfg.Agent.Mode) {
-	case models.AgentModeConnected, models.AgentModeDisconnected:
-	default:
-		return fmt.Errorf("invalid mode %q: must be %q or %q", cfg.Agent.Mode, models.AgentModeConnected, models.AgentModeDisconnected)
-	}
-
-	return nil
+type groupRegistration struct {
+	prefix  string
+	factory APIGroupFactory
 }
 
-func validateUUID(value, name string) error {
-	if value == "" {
-		return fmt.Errorf("%s cannot be empty", name)
-	}
-	if _, err := uuid.Parse(value); err != nil {
-		return fmt.Errorf("%s must be a valid UUID: %w", name, err)
-	}
-	return nil
+// Builder shares startup and cleanup across builds without selecting an API.
+// With methods only record options; Build allocates resources.
+type Builder struct {
+	cfg    *config.Configuration
+	groups []groupRegistration
 }
 
-func InitOPA(cfg *config.Configuration) (*opa.Validator, error) {
+func NewBuilder(cfg *config.Configuration) *Builder {
+	return &Builder{cfg: cfg}
+}
+
+func (b *Builder) WithGroup(prefix string, factory APIGroupFactory) *Builder {
+	b.groups = append(b.groups, groupRegistration{prefix: prefix, factory: factory})
+
+	return b
+}
+
+// Build initializes shared inputs and lets each factory initialize its provider.
+// On success the caller owns cleanup; on failure resources are closed here.
+func (b *Builder) Build() (*server.Server, func(), error) {
+	if b.cfg == nil {
+		return nil, nil, fmt.Errorf("configuration is required")
+	}
+
+	if len(b.groups) == 0 {
+		return nil, nil, fmt.Errorf("at least one API group is required")
+	}
+
+	seen := make(map[string]bool, len(b.groups))
+	for _, group := range b.groups {
+		if !strings.HasPrefix(group.prefix, "/") || path.Clean(group.prefix) != group.prefix {
+			return nil, nil, fmt.Errorf("invalid API group prefix %q", group.prefix)
+		}
+		if seen[group.prefix] {
+			return nil, nil, fmt.Errorf("duplicate API group prefix %q", group.prefix)
+		}
+		if group.factory == nil {
+			return nil, nil, fmt.Errorf("API group %q requires a factory", group.prefix)
+		}
+		seen[group.prefix] = true
+	}
+
+	opaValidator, err := b.initOPA(b.cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	pool, err := b.initPool(b.cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var cleanups []func()
+	var once sync.Once
+
+	cleanup := func() {
+		once.Do(func() {
+			for i := len(cleanups) - 1; i >= 0; i-- {
+				cleanups[i]()
+			}
+
+			pool.Close()
+			zap.S().Info("providers and pool closed")
+		})
+	}
+
+	built := false
+	defer func() {
+		if !built {
+			cleanup()
+		}
+	}()
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		handlers.RegisterValidators(v)
+	}
+
+	groups := make(map[string]server.APIGroup, len(b.groups))
+	for _, registration := range b.groups {
+		group, stop, err := registration.factory(b.cfg, pool, opaValidator)
+		if stop != nil {
+			cleanups = append(cleanups, stop)
+		}
+
+		if err != nil {
+			return nil, nil, fmt.Errorf("creating API group %q: %w", registration.prefix, err)
+		}
+
+		if group.RegisterFn == nil {
+			return nil, nil, fmt.Errorf("API group %q requires route registration", registration.prefix)
+		}
+
+		groups[registration.prefix] = group
+	}
+
+	srv, err := server.NewServer(b.cfg, groups)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create HTTP server: %w", err)
+	}
+
+	built = true
+
+	return srv, cleanup, nil
+}
+
+func (b *Builder) initOPA(cfg *config.Configuration) (*opa.Validator, error) {
 	v, err := opa.NewValidatorFromDir(cfg.Agent.OpaPoliciesFolder)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize OPA validator: %w", err)
@@ -84,7 +147,7 @@ func InitOPA(cfg *config.Configuration) (*opa.Validator, error) {
 	return v, nil
 }
 
-func InitPool(cfg *config.Configuration) (*store.Pool, error) {
+func (b *Builder) initPool(cfg *config.Configuration) (*store.Pool, error) {
 	pool := store.NewPool(5 * time.Minute)
 
 	agentPath := filepath.Join(cfg.Agent.DataFolder, "agent.duckdb")
@@ -141,12 +204,6 @@ func InitPool(cfg *config.Configuration) (*store.Pool, error) {
 	}
 
 	return pool, nil
-}
-
-func RegisterValidators() {
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		handlers.RegisterValidators(v)
-	}
 }
 
 func cleanupStaleCollections(mainDB *store.Database, dataFolder string) error {
